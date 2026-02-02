@@ -1,61 +1,35 @@
-RishFlow 🚀 AI-Powered Desktop File Organizer
+# RishFlow File Organizer
 
-Privacy-first desktop app that auto-organizes Downloads folders using rule-based + ML classification. Local retraining, OCR for images/PDFs, real-time scanning.
+RishFlow is a desktop file organizer and AI-assisted sorter that helps you clean up and manage files with a beautiful dashboard and privacy-first AI features.
 
-✨ Features
-Dark-theme CustomTkinter UI: Source/target folders, real-time scan, extension preview, file preview
+Key features
+- Organize files by extension, date, size, or AI-based classification
+- Folder statistics: total files and aggregated sizes
+- Duplicate detection and undo support
+- Lightweight local AI index (text + PDF search) with upgrade path to full RAG
+- Privacy-first: local processing, optional cloud LLMs are explicit opt-in
 
-Hybrid Classification: Extension rules + TF-IDF/ML (NaiveBayes, RandomForest)
+Quick start
+1. git clone https://github.com/rishee-wq/files-organizer
+2. python -m venv .venv && .\.venv\Scripts\activate
+3. pip install -r requirements.txt
+4. (Optional) pip install pypdf for PDF indexing
+5. python app.py
 
-Active Learning: User corrections → local model retraining
+Architecture & research notes
+- Frontend: HTML dashboard (Tailwind) + pywebview integration
+- Backend: `app.py` exposes folder scanning, stats, AI indexing and organization APIs
+- AI: `ai_sorter.py` uses OpenCV + pytesseract heuristics for classification
 
-Multi-modal: OCR (pytesseract/cv2) for images/PDFs + metadata analysis
+Research highlights (internal/experimental)
+- Hybrid classification (rules + ML heuristics) was tested in earlier experiments with promising results on synthetic Downloads datasets.
 
-Standalone: PyInstaller .exe with custom logo.ico
+See `docs/RishFlow_Docs.pdf` for a detailed publication-ready overview including architecture diagrams, privacy notes and a publishing checklist.
 
-Privacy: 100% local SQLite index, no cloud
+Roadmap
+- Add LangChain-based RAG and embedding indexing (optional cloud or local LLM)
+- UI polish and theme pack
+- Unit tests, CI pipeline and PyInstaller release builds
 
-📊 Research Results
-RandomForest: 92% accuracy, 0.91 F1-score, 4.2s per 100 files
+License: MIT
 
-NaiveBayes: 88% accuracy, 0.86 F1-score, 3.5s per 100 files
-
-Rule-based baseline: 75% accuracy, 0.70 F1-score, 2.1s per 100 files
-
-Tested on 1K+ files (synthetic Downloads + public benchmarks), 5-fold CV
-
-🚀 Quick Start
-bash
-git clone https://github.com/yourusername/RishFlow
-cd RishFlow
-pip install -r requirements.txt
-python app.py
-# Or double-click RishFlow.exe
-🛠️ Architecture
-app.py (CustomTkinter UI)
-
-ai_sorter.py (ML Pipeline)
-
-models/rishflow_model.pkl
-
-data/ (local SQLite index)
-
-ML Pipeline: TF-IDF → Classifier → User Feedback Loop → Retrain
-
-🔬 Research Paper Ready
-Novelty: Local active learning + multi-modal desktop classification
-
-Evaluation: Ablation studies, user study (n=15, 68% time saved)
-
-Venue: IEEE Student Conferences, IJCT, arXiv preprint
-
-Full reproducibility with datasets + training scripts
-
-📈 Roadmap
-ML retraining UI [Done]
-
-Benchmark tables [Done]
-
-Local LLM semantic folders [Next]
-
-Cross-platform Linux/Mac [Future]
