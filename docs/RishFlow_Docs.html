@@ -1,0 +1,121 @@
+<html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#111}h1{font-size:22px}h2{font-size:18px}pre{background:#f6f6f8;padding:10px;border-radius:6px}code{background:#f2f2f4;padding:2px 4px;border-radius:4px}hr{border:none;border-top:1px solid #eee;margin:24px 0}</style></head><body><h1>RishFlow — Project Overview &amp; Publication Guide</h1>
+<p>Version: 2.0
+Date: 2026-02-02</p>
+<hr />
+<h2>1. Executive Summary</h2>
+<p>RishFlow is a desktop file-organizer that helps users tidy files into meaningful folders using rule-based and AI-powered techniques. This document describes the system architecture, features, installation and publishing checklist, AI design choices (including a privacy-first local index and upgrade path to RAG), and clear next steps for preparing a polished public release.</p>
+<hr />
+<h2>2. Key Features</h2>
+<ul>
+<li>Modern HTML dashboard (embedded in Python webview) with a clean, themeable interface.</li>
+<li>File organization modes: File Extension, Date Modified, Size Category, AI-based classification (content-aware via <code>AISmartSorter</code>).</li>
+<li>Folder stats (file counts and aggregated sizes) and top largest files.</li>
+<li>Activity logging (SQLite) and undo (revert) support.</li>
+<li>Duplicate detection using exact MD5 hashing and perceptual image hashing.</li>
+<li>Lightweight, privacy-first AI index for <code>.txt</code> and <code>.pdf</code> files plus a simple local search (prototype for RAG).</li>
+</ul>
+<hr />
+<h2>3. System Architecture (brief)</h2>
+<ul>
+<li>Frontend: <code>stitch_rishflow_dashboard_home (1)/code.html</code> — Tailwind/Tailwind CDN, JS controls, theme persistence in <code>localStorage</code>, interacts with Python via <code>pywebview</code> JS API.</li>
+<li>Backend: <code>app.py</code> — <code>RishFlowAPI</code> class exposes methods to JS (<code>scan_source</code>, <code>get_folder_stats</code>, <code>start_organizing</code>, <code>revert_last</code>, <code>index_for_ai</code>, <code>query_ai</code>, <code>find_duplicates</code>).</li>
+<li>AI: <code>ai_sorter.py</code> — OpenCV + Tesseract heuristics for image/document classification.</li>
+<li>Utilities: <code>duplicate_finder.py</code> (hashing), <code>bulk_rename.py</code> (renaming strategies).</li>
+</ul>
+<hr />
+<h2>4. Installation &amp; Quick Start</h2>
+<p>Requirements (recommended): Python 3.11+ (3.13 tested), Windows 10/11.</p>
+<ol>
+<li>Clone the repo.</li>
+<li>Create a virtual environment (recommended):</li>
+</ol>
+<pre><code class="language-bash">python -m venv .venv
+.\.venv\Scripts\activate
+</code></pre>
+<ol>
+<li>Install dependencies:</li>
+</ol>
+<pre><code class="language-bash">pip install -r requirements.txt
+</code></pre>
+<ol>
+<li>(Optional) For PDF indexing: <code>pip install pypdf</code></li>
+<li>Start the app:</li>
+</ol>
+<pre><code class="language-bash">python app.py
+</code></pre>
+<ol>
+<li>Browse: Click <em>Browse</em> to select a Source folder and see live <strong>Items</strong> and <strong>Size</strong> stats. Use <strong>AI Search</strong> to query <code>.txt</code> and <code>.pdf</code> content locally.</li>
+</ol>
+<hr />
+<h2>5. Detailed Feature Explanations</h2>
+<h3>5.1 Folder Stats</h3>
+<ul>
+<li>API: <code>get_folder_stats(folder_path)</code> returns <code>total_files</code>, <code>total_size</code> (bytes), <code>count_by_type</code>, <code>size_by_type</code>, <code>largest_files</code> (top 10).</li>
+<li>Frontend updates metrics after folder selection and when organization/revert completes.</li>
+</ul>
+<h3>5.2 AI Search (Local Prototype)</h3>
+<ul>
+<li><code>index_for_ai(folder_path)</code> extracts text from <code>.txt</code> and <code>.pdf</code> files and keeps a lightweight in-memory index.</li>
+<li><code>query_ai(folder_path, query)</code> performs substring search over the indexed texts and filenames and returns snippets.</li>
+<li>Privacy-first by design: no data leaves the machine unless you later integrate cloud LLMs.</li>
+</ul>
+<h3>5.3 RAG/LLM Upgrade Path</h3>
+<ul>
+<li>For production RAG, add:</li>
+<li>Embeddings (e.g., <code>sentence-transformers</code> or OpenAI embeddings)</li>
+<li>Vector store (Chroma or FAISS)</li>
+<li>LangChain for orchestration</li>
+<li>LLM provider: OpenAI (cloud) or a local LLM (e.g., via Ollama, or Llama.cpp)</li>
+<li>Architecture: extract documents → split → embed → store → query → re-rank → use LLM to synthesize answers.</li>
+</ul>
+<hr />
+<h2>6. Privacy &amp; Security Considerations</h2>
+<ul>
+<li>The current AI index is local and stores only text snippets in memory. No network calls are made by default.</li>
+<li>If you enable cloud LLMs (OpenAI), be explicit in UI and docs that files (or embeddings) will be sent to a third-party provider.</li>
+<li>Sanitize user inputs, limit file types for AI indexing, and provide clear opt-in prompts for cloud features.</li>
+</ul>
+<hr />
+<h2>7. UI &amp; Theme Guidance</h2>
+<ul>
+<li>The UI uses Tailwind and CSS variables / gradient overlays for themes (<code>ocean</code>, <code>deep</code>, <code>sunset</code>).</li>
+<li>To add new themes, add style blocks in <code>code.html</code> and a corresponding button that calls <code>setTheme('yourtheme')</code>.</li>
+<li>Persist theme using <code>localStorage</code> (already implemented).</li>
+</ul>
+<hr />
+<h2>8. Tests &amp; CI Recommendations</h2>
+<ul>
+<li>Add unit tests for:</li>
+<li><code>get_folder_stats</code> (counts, sizes, edge cases)</li>
+<li><code>query_ai</code> and <code>index_for_ai</code> (with sample files)</li>
+<li>Add GitHub Actions to run tests on push, linting (flake8/ruff), and to build a release artifact (optional: PyInstaller build via <code>build.py</code>).</li>
+</ul>
+<hr />
+<h2>9. Packaging &amp; Publishing Checklist (What you need to do)</h2>
+<ol>
+<li>Finalize UI copy and screenshots.</li>
+<li>Add detailed README and usage samples.</li>
+<li>Add automated tests and CI.</li>
+<li>Choose an LLM strategy (cloud vs local). If cloud, ensure user consent and API key configuration is clear.</li>
+<li>Update <code>build.py</code> and <code>requirements.txt</code> with any added dependencies.</li>
+<li>Create release notes and a marketing one-pager.</li>
+<li>Run the PyInstaller build and test the generated executable on a clean Windows environment.</li>
+<li>(Optional) Create an installer using <code>Inno Setup</code> or similar.</li>
+</ol>
+<hr />
+<h2>10. Suggested Release Assets (I'll create these if you want)</h2>
+<ul>
+<li>Short demo video (2–3 minutes) showcasing key flows.</li>
+<li><code>docs/RishFlow_Docs.pdf</code> — this publication guide in PDF.</li>
+<li><code>docs/QuickStart.md</code> — condensed quick start for README.</li>
+<li>Screenshots and a one-page slide deck for product listing.</li>
+</ul>
+<hr />
+<h2>11. Contact &amp; Next Steps</h2>
+<p>If you'd like, I can:
+- Produce the 2–3 minute MP4 demo (slides + synthetic narration),
+- Generate <code>docs/RishFlow_Docs.pdf</code> and place it in the <code>docs/</code> folder (I will do that now), and
+- Create a <code>Publish.md</code> with step-by-step build &amp; release commands.</p>
+<p>Please confirm if you want the video included and which narration option: <strong>A: synthetic narration (I produce MP4)</strong> or <strong>B: recording script for you to record</strong>.</p>
+<hr />
+<p><em>End of document.</em></p></body></html>

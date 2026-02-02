@@ -1,0 +1,15 @@
+PyQt5>=5.15.9
+pywebview>=4.0
+opencv-python>=4.8.0
+pytesseract>=0.3.10
+Pillow>=11.0.0
+numpy>=2.0.0
+google-api-python-client>=2.100.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=1.1.0
+pypdf>=3.10.0  # optional: used by lightweight AI indexer to extract text from PDFs
+# Optional (advanced AI/RAG features):
+# langchain>=0.0.195
+# chromadb>=0.3.30
+# faiss-cpu>=1.7.2
+# openai>=0.27.0
